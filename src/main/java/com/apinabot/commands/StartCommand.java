@@ -13,6 +13,7 @@ public class StartCommand implements Command {
 
     @Override
     public void execute(Long chatId, ApinaBot bot) {
+        LOGGER.debug("Executing start command");
         String help = "Welcome to ApinaBot! I'm a simple info bot for indoor climbing gyms. Here are the commands you can use:\n";
         try {
             bot.execute(MessageUtil.sendText(chatId, help + helpText()));
@@ -22,6 +23,7 @@ public class StartCommand implements Command {
     }
     @Override
     public void execute(Long chatId, String[] args, ApinaBot bot) {
+        LOGGER.debug("Received args for start command: {}", (Object) args);
         try {
             bot.execute(MessageUtil.sendText(chatId, "I'm sorry, I don't understand that command."));
         } catch (TelegramApiException e) {

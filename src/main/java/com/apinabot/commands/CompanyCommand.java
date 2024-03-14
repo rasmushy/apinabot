@@ -28,30 +28,15 @@ public class CompanyCommand implements Command {
 
     @Override
     public void execute(Long chatId, ApinaBot bot) {
-        CompletableFuture.supplyAsync(apinaApiService::getAllGyms).thenAccept(result -> {
-            try {
-                if (!result.isSuccess()) {
-                    LOGGER.error("Failed to fetch gyms. {}", result.getError().getMessage());
-                    bot.execute(MessageUtil.sendText(chatId, "Failed to fetch gym information for company selection. " + result.getError().getMessage()));
-                    return;
-                }
-                List<GymInfo> gyms = result.getData();
-                Set<String> companySet = gyms.stream().map(gym -> gym.getCompany().getName()).collect(Collectors.toSet());
-                InlineKeyboardMarkup companyKeyboard = KeyboardUtil.createCompanyKeyboard(new ArrayList<>(companySet));
-                LOGGER.debug("Sending company keyboard: {}", companyKeyboard);
-                bot.execute(MessageUtil.sendMenu(chatId, "Select a company:", companyKeyboard));
-            } catch (TelegramApiException e) {
-                LOGGER.error("Failed to send company infos", e);
-            }
-        }).exceptionally(e -> {
-            try {
-                bot.execute(MessageUtil.sendText(chatId, "Failed to fetch company information. Please try again later."));
-            } catch (TelegramApiException ex) {
-                LOGGER.error("Failed to send error message", ex);
-            }
-            return null;
-        });
-
+        try {
+            List<GymInfo> gyms = bot.getStateHandler().getAllGyms();
+            Set<String> companySet = gyms.stream().map(gym -> gym.getCompany().getName()).collect(Collectors.toSet());
+            InlineKeyboardMarkup companyKeyboard = KeyboardUtil.createCompanyKeyboard(new ArrayList<>(companySet));
+            LOGGER.debug("Sending company keyboard: {}", companyKeyboard);
+            bot.execute(MessageUtil.sendMenu(chatId, "Select a company:", companyKeyboard));
+        } catch (TelegramApiException e) {
+            LOGGER.error("Failed to send company infos", e);
+        }
     }
     @Override
     public void execute(Long chatId, String[] args, ApinaBot bot) {

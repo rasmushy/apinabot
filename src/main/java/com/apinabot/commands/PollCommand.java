@@ -18,6 +18,7 @@ public class PollCommand implements Command {
     }
     @Override
     public void execute(Long chatId, ApinaBot bot) {
+        LOGGER.debug("Executing poll command");
         try {
             InlineKeyboardMarkup pollKeyboard = KeyboardUtil.createPollKeyboard();
             bot.execute(MessageUtil.sendMenu(chatId, "Select poll type:", pollKeyboard));

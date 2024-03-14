@@ -7,7 +7,6 @@ import com.apinabot.bots.ApinaBot;
  */
 public interface Command {
     void execute(Long chatId, ApinaBot bot);
-
     void execute(Long chatId, String[] args, ApinaBot bot);
 
 }

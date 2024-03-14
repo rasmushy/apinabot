@@ -13,6 +13,7 @@ public class MenuCommand implements Command {
 
     @Override
     public void execute(Long chatId, ApinaBot bot) {
+        LOGGER.debug("Executing menu command");
         try {
             InlineKeyboardMarkup mainMenu = KeyboardUtil.createMainMenu();
             bot.execute(MessageUtil.sendMenu(chatId, "ApinaBot menu: ", mainMenu));
@@ -22,6 +23,7 @@ public class MenuCommand implements Command {
     }
     @Override
     public void execute(Long chatId, String[] args, ApinaBot bot) {
+        LOGGER.debug("Received args for menu command: {}", (Object) args);
         try {
             bot.execute(MessageUtil.sendText(chatId, "I'm sorry, I don't understand that command."));
         } catch (TelegramApiException e) {

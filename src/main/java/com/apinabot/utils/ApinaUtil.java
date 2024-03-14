@@ -5,6 +5,7 @@ import com.apinabot.bots.ApinaBot;
 import com.apinabot.commands.CommandFactory;
 import com.apinabot.commands.HelpCommand;
 import com.apinabot.commands.StartCommand;
+import com.apinabot.config.ConfigLoader;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -17,8 +18,6 @@ public class ApinaUtil {
 
     private ApinaUtil() {
     }
-
-
 
     public static String getCurrentTime() {
         //Finnish time
@@ -56,16 +55,11 @@ public class ApinaUtil {
      * @see ApinaBot
      */
     public static String helpText() {
-        return """
-                /start - Start the bot
-                /help - Show this help message
-                /menu - Show the main menu
-                /gyms - Show all gyms
-                /city - Show gyms in a city
-                /company - Show gyms by a company
-                /price - Show the price of a gym
-                /open - Show currently open gyms
-                /poll - Create a poll
-                """;
+        String[] commandHelp = ConfigLoader.getBotCommandHelp().split(",");
+        StringBuilder helpText = new StringBuilder();
+        for (String command : commandHelp) {
+            helpText.append(command).append("\n");
+        }
+        return helpText.toString();
     }
 }

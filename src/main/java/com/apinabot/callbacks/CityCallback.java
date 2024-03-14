@@ -23,7 +23,7 @@ public class CityCallback implements ApinaCallback {
     }
     @Override
     public void handleCallback(String callbackData, long chatId, int messageId, ApinaBot bot) {
-        LOGGER.debug("Received city request: {}", callbackData);
+        LOGGER.debug("Handling city callback with data: {}", callbackData);
         CompletableFuture.supplyAsync(() -> apinaApiService.getGymsByCity(callbackData)).thenAccept(result -> {
             if (!result.isSuccess()) {
                 LOGGER.error("Failed to fetch gyms. {}", result.getError().getMessage());

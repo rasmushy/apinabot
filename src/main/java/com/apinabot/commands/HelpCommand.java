@@ -12,6 +12,7 @@ public class HelpCommand implements Command {
     private static final Logger LOGGER = LoggerFactory.getLogger(HelpCommand.class);
 
     public void execute(Long chatId, ApinaBot bot) {
+        LOGGER.debug("Executing help command");
         try {
             bot.execute(MessageUtil.sendText(chatId, helpText()));
         } catch (TelegramApiException e) {
@@ -20,6 +21,7 @@ public class HelpCommand implements Command {
     }
     @Override
     public void execute(Long chatId, String[] args, ApinaBot bot) {
+        LOGGER.debug("Received args for help command: {}", (Object) args);
         try {
             bot.execute(MessageUtil.sendText(chatId, "I'm sorry, I don't understand that command."));
         } catch (TelegramApiException e) {

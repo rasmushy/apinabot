@@ -24,7 +24,7 @@ public class CompanyCallback implements ApinaCallback {
     }
     @Override
     public void handleCallback(String callbackData, long chatId, int messageId, ApinaBot bot) {
-        LOGGER.debug("Received company request: {}", callbackData);
+        LOGGER.debug("Handling company callback with data: {}", callbackData);
         CompletableFuture.supplyAsync(() -> apinaApiService.getGymsByCompany(callbackData)).thenAccept(result -> {
             try {
                 if (!result.isSuccess()) {

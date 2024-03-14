@@ -10,7 +10,7 @@ public class CallbackFactory {
 
     public CallbackFactory() {
         callbackMap.put("menu", new MenuCallback(new ApinaApiService()));
-        callbackMap.put("gym", new GymCallback(new ApinaApiService()));
+        callbackMap.put("gym", new GymCallback());
         callbackMap.put("company", new CompanyCallback(new ApinaApiService()));
         callbackMap.put("city", new CityCallback(new ApinaApiService()));
         callbackMap.put("open", new OpenCallback(new ApinaApiService()));

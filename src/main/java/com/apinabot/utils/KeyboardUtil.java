@@ -71,14 +71,16 @@ public class KeyboardUtil {
         return new InlineKeyboardMarkup(keyboard);
     }
 
-    public static InlineKeyboardMarkup createGymPollKeyboard(Set<String> gyms) {
+    public static InlineKeyboardMarkup createGymPollKeyboard(List<String> gyms, Set<String> selectedGyms) {
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         for (String gym : gyms) {
-            String label = gyms.contains(gym) ? "✅ " + gym : gym;
+            String label = selectedGyms.contains(gym) ? "✅ " + gym : gym;
             InlineKeyboardButton button = new InlineKeyboardButton();
             button.setText(label);
             button.setCallbackData("poll_" + gym);
-            keyboard.add(Collections.singletonList(button));
+            List<InlineKeyboardButton> row = new ArrayList<>();
+            row.add(button);
+            keyboard.add(row);
         }
         InlineKeyboardButton confirmButton = new InlineKeyboardButton();
         confirmButton.setText("Confirm Selections");
@@ -88,8 +90,8 @@ public class KeyboardUtil {
     }
 
     public static InlineKeyboardMarkup createMenuForGymPoll(List<GymInfo> gyms) {
-        Set<String> gymNames = gyms.stream().map(GymInfo::getDisplayName).collect(Collectors.toSet());
-        return KeyboardUtil.createGymPollKeyboard(gymNames);
+        List<String> gymNames = gyms.stream().map(GymInfo::getDisplayName).collect(Collectors.toList());
+        return KeyboardUtil.createGymPollKeyboard(gymNames, Collections.emptySet());
     }
 
     // Create a keyboard for poll menu to have quick way to create Gym or Day poll

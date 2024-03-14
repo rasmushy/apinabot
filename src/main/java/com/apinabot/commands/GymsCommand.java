@@ -24,31 +24,13 @@ public class GymsCommand implements Command {
 
     @Override
     public void execute(Long chatId, ApinaBot bot) {
-        CompletableFuture.supplyAsync(apinaApiService::getAllGyms)
-                .thenAccept(result -> {
-                    try {
-                        if (!result.isSuccess()) {
-                            LOGGER.error("Failed to fetch gyms for gym keyboard. {}", result.getError().getMessage());
-                            bot.execute(MessageUtil.sendText(chatId, "Failed to fetch gym information for gym selection. Please try again later."));
-                            return;
-                        }
-                        List<GymInfo> gyms = result.getData();
-                        List<String> list = gyms.stream().map(GymInfo::getDisplayName).collect(Collectors.toList());
-                        InlineKeyboardMarkup gymKeyboard = KeyboardUtil.createGymKeyboard(list);
-                        LOGGER.debug("Sending gym keyboard: {}", gymKeyboard);
-                        bot.execute(MessageUtil.sendMenu(chatId, "Select a climbing gym:", gymKeyboard));
-                    } catch (TelegramApiException e) {
-                        LOGGER.error("Failed to send gym infos", e);
-                    }
-                })
-                .exceptionally(e -> {
-                    try {
-                        bot.execute(MessageUtil.sendText(chatId, "Failed to fetch gym information. Please try again later."));
-                    } catch (TelegramApiException ex) {
-                        LOGGER.error("Failed to send error message", ex);
-                    }
-                    return null;
-                });
+        try {
+            InlineKeyboardMarkup gymKeyboard = KeyboardUtil.createGymKeyboard(bot.getStateHandler().getAllGymsDisplayName());
+            LOGGER.debug("Sending gym keyboard: {}", gymKeyboard);
+            bot.execute(MessageUtil.sendMenu(chatId, "Select a climbing gym:", gymKeyboard));
+        } catch (TelegramApiException e) {
+            LOGGER.error("Failed to send gym infos", e);
+        }
     }
     @Override
     public void execute(Long chatId, String[] args, ApinaBot bot) {

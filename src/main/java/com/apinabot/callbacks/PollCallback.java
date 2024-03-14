@@ -23,46 +23,38 @@ public class PollCallback implements ApinaCallback {
     }
     @Override
     public void handleCallback(String callbackData, long chatId, int messageId, ApinaBot bot) {
-        LOGGER.debug("Received poll callback request: {}", callbackData);
+        LOGGER.debug("Handling poll callback with data: {}", callbackData);
         if (stateHandler == null) {
             stateHandler = bot.getStateHandler();
         }
         // Handle menu selections and update state
-        boolean updated = handlePollState(callbackData, stateHandler, chatId);
-        if (!updated) {
+        if (!handlePollState(callbackData, stateHandler, chatId)) {
             // Confirm button pressed generate gym poll (Venue poll)
             LOGGER.debug("Creating gym poll");
             Set<String> selectedGyms = stateHandler.getSelections(chatId, TYPE);
-            if (!selectedGyms.isEmpty()) {
-                try {
-                    if (!stateHandler.isEmpty(chatId, TYPE)) {
-                        bot.execute(createGymPoll(chatId, stateHandler.getSelections(chatId, TYPE)));
-                    } else {
-                        bot.execute(MessageUtil.sendText(chatId, "No gyms selected for poll creation."));
-                    }
-                } catch (TelegramApiException e) {
-                    LOGGER.error("Failed to send poll", e);
-                }
-            } else {
-                try {
+            try {
+                if (!selectedGyms.isEmpty()) {
+                    bot.execute(createGymPoll(chatId, stateHandler.getSelections(chatId, TYPE)));
                     //Clear poll creation message and state
                     bot.execute(deleteMessage(chatId, messageId));
-                } catch (TelegramApiException e) {
-                    LOGGER.error("Failed to clear poll creation message", e);
+                    stateHandler.clearState(chatId, TYPE);
+                } else {
+                    bot.execute(MessageUtil.sendText(chatId, "No gyms selected for poll creation."));
                 }
-                stateHandler.clearState(chatId, TYPE);
+            } catch (TelegramApiException e) {
+                LOGGER.error("Failed to send poll", e);
             }
+            return;
         }
         // Update poll creation message
-        if (updated) {
-            try {
-                LOGGER.debug("Updating poll creation message");
-                InlineKeyboardMarkup updatedKeyboard = KeyboardUtil.createGymPollKeyboard(stateHandler.getSelections(chatId, TYPE));
-                bot.execute(MessageUtil.updateGymPollSelections(chatId, messageId, updatedKeyboard));
-            } catch (TelegramApiException e) {
-                LOGGER.error("Failed to update poll creation message", e);
+        try {
+            LOGGER.debug("Updating poll creation message");
+            InlineKeyboardMarkup updatedKeyboard = KeyboardUtil.createGymPollKeyboard(stateHandler.getAllGymsDisplayName(), stateHandler.getSelections(chatId, TYPE));
+            bot.execute(MessageUtil.updateGymPollSelections(chatId, messageId, updatedKeyboard));
+        } catch (
+                TelegramApiException e) {
+            LOGGER.error("Failed to update poll creation message", e);
 
-            }
         }
     }
     private boolean handlePollState(String callbackData, StateHandler stateHandler, long chatId) {

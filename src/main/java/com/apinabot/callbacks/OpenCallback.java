@@ -26,20 +26,22 @@ public class OpenCallback implements ApinaCallback {
     }
     @Override
     public void handleCallback(String callbackData, long chatId, int messageId, ApinaBot bot) {
-        LOGGER.debug("Received open request: {}", callbackData);
+        LOGGER.debug("Handling open callback with data: {}", callbackData);
         if (stateHandler == null) {
             stateHandler = bot.getStateHandler();
         }
+        // if selected company is at state handler, remove it
         if (stateHandler.getSelections(chatId, TYPE).contains(callbackData)) {
             stateHandler.removeSelection(chatId, callbackData, TYPE);
         }
+        // If the user has not selected any companies, clear the menu
         if (stateHandler.isEmpty(chatId, TYPE)) {
             try {
                 bot.execute(MessageUtil.deleteMessage(chatId, messageId));
             } catch (TelegramApiException e) {
                 LOGGER.error("Failed to clear openNow menu", e);
             }
-        } else {
+        } else { // If the user has selected companies, update the menu
             InlineKeyboardMarkup companyKeyboard = KeyboardUtil.createCompanySelectionKeyboard(new ArrayList<>(stateHandler.getSelections(chatId, TYPE)), TYPE);
             try {
                 bot.execute(MessageUtil.updateExistingMenu(chatId, "Select a company to see open gyms:", companyKeyboard, messageId));

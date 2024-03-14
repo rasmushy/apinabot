@@ -2,6 +2,7 @@ package com.apinabot.handlers;
 
 import com.apinabot.api.dto.GymInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,7 @@ public class StateHandler {
     }
 
     public List<GymInfo> getAllGyms() {
-        return List.copyOf(allGyms.values());
+        return new ArrayList<>(allGyms.values());
     }
 
     public List<String> getAllGymsDisplayName() {

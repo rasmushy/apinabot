@@ -9,9 +9,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static com.apinabot.utils.ParseUtil.*;
 public class MessageUtil {

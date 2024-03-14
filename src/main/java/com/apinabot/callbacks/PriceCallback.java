@@ -29,7 +29,7 @@ public class PriceCallback implements ApinaCallback {
 
     @Override
     public void handleCallback(String callbackData, long chatId, int messageId, ApinaBot bot) {
-        LOGGER.debug("Received price request: {}", callbackData);
+        LOGGER.debug("Handling price callback with data: {}", callbackData);
         if (stateHandler == null) {
             stateHandler = bot.getStateHandler();
         }

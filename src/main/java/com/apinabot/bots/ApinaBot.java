@@ -3,6 +3,7 @@ package com.apinabot.bots;
 import com.apinabot.api.ApinaApiService;
 import com.apinabot.callbacks.CallbackFactory;
 import com.apinabot.commands.CommandFactory;
+import com.apinabot.config.ConfigLoader;
 import com.apinabot.handlers.CallbackQueryHandler;
 import com.apinabot.handlers.MessageHandler;
 import com.apinabot.handlers.StateHandler;
@@ -51,7 +52,7 @@ public class ApinaBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "ApinaBot";
+        return ConfigLoader.getBotUsername();
     }
 
     @Override

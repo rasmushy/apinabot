@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.concurrent.CompletableFuture;
-
 import static com.apinabot.utils.KeyboardUtil.createMenuForGymPoll;
 import static com.apinabot.utils.PollUtil.createDayPoll;
 
@@ -24,7 +22,7 @@ public class MenuCallback implements ApinaCallback {
 
     @Override
     public void handleCallback(String callbackData, long chatId, int messageId, ApinaBot bot) {
-        LOGGER.debug("Received menu request: {}", callbackData);
+        LOGGER.debug("Handling menu callback with data: {}", callbackData);
         switch (callbackData) {
             case "gyms":
                 new GymsCommand(apinaApiService).execute(chatId, bot);
@@ -53,28 +51,12 @@ public class MenuCallback implements ApinaCallback {
                 }
                 break;
             case "gymPoll":
-                CompletableFuture.supplyAsync(apinaApiService::getAllGyms)
-                        .thenAccept(result -> {
-                            try {
-                                if (!result.isSuccess()) {
-                                    LOGGER.error("Failed to fetch gyms for poll creation. {}", result.getError().getMessage());
-                                    bot.execute(MessageUtil.updateExistingMenu(chatId, "Failed to fetch gym information for poll creation. Please try again later.", null, messageId));
-                                    return;
-                                }
-                                bot.execute(MessageUtil.sendMenu(chatId, "Select gyms to include in the poll:", createMenuForGymPoll(result.getData())));
-                                bot.execute(MessageUtil.deleteMessage(chatId, messageId));
-                            } catch (Exception e) {
-                                LOGGER.error("Failed to send gym selection menu", e);
-                            }
-                        })
-                        .exceptionally(e -> {
-                            try {
-                                bot.execute(MessageUtil.updateExistingMenu(chatId, "Failed to fetch gym information for poll creation. Please try again later.", null, messageId));
-                            } catch (Exception ex) {
-                                LOGGER.error("Failed to send error message", ex);
-                            }
-                            return null;
-                        });
+                try {
+                    bot.execute(MessageUtil.sendMenu(chatId, "Select gyms to include in the poll:", createMenuForGymPoll(bot.getStateHandler().getAllGyms())));
+                    bot.execute(MessageUtil.deleteMessage(chatId, messageId));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to send gym selection menu", e);
+                }
                 break;
             default:
                 LOGGER.error("Unknown menu item selected: {}", callbackData);

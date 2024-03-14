@@ -7,20 +7,50 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 public class ConfigLoader {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigLoader.class);
-    public static String getBotToken() throws IOException {
-        try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream("application.properties")) {
-            Properties prop = new Properties();
+    private static final String PROPERTIES_FILE = "application.properties";
+
+    private static final Properties properties = new Properties();
+
+    private ConfigLoader() {
+    }
+
+    public static void loadConfig() {
+        LOGGER.debug("Loading application.properties");
+        try (InputStream input = ConfigLoader.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE)) {
             if (input == null) {
                 LOGGER.error("Sorry, unable to find application.properties");
-                return null;
+                return;
             }
-            prop.load(input);
-            return prop.getProperty("bot.token");
+            properties.load(input);
         } catch (IOException ex) {
             LOGGER.error("Failed to load application.properties", ex);
-            return null;
         }
+    }
+
+    public static String getBotToken() {
+        return properties.getProperty("bot.token");
+    }
+
+    public static String getBotUsername() {
+        return properties.getProperty("bot.username");
+    }
+
+    public static String getBotWebhook() {
+        return properties.getProperty("bot.webhook");
+    }
+
+    public static String getApiUrl() {
+        return properties.getProperty("api.url");
+    }
+
+    public static String getBotCommands() {
+        return properties.getProperty("bot.commands");
+    }
+
+    public static String getBotCommandHelp() {
+        return properties.getProperty("bot.command.help");
     }
 }
 

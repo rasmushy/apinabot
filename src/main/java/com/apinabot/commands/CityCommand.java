@@ -28,39 +28,25 @@ public class CityCommand implements Command {
 
     @Override
     public void execute(Long chatId, ApinaBot bot) {
-        CompletableFuture.supplyAsync(apinaApiService::getAllGyms).thenAccept(result -> {
-            try {
-                if (!result.isSuccess()) {
-                    LOGGER.error("Failed to fetch gyms. {}", result.getError().getMessage());
-                    bot.execute(MessageUtil.sendText(chatId, "Failed to fetch gym information for city selection. Please try again later."));
-                    return;
-                }
-                List<GymInfo> gyms = result.getData();
-                Set<String> uniqueCities = new HashSet<>();
-                for (GymInfo gym : gyms) {
-                    String city = gym.getAddress().getCity();
-                    uniqueCities.add(city);
-                }
-                InlineKeyboardMarkup cityKeyboard = KeyboardUtil.createCityKeyboard(new ArrayList<>(uniqueCities));
-                bot.execute(MessageUtil.sendMenu(chatId, "Select a city:", cityKeyboard));
-            } catch (TelegramApiException e) {
-                LOGGER.error("Failed to send gym infos", e);
+        LOGGER.debug("Executing city command");
+        try {
+            List<GymInfo> gyms = bot.getStateHandler().getAllGyms();
+            Set<String> uniqueCities = new HashSet<>();
+            for (GymInfo gym : gyms) {
+                String city = gym.getAddress().getCity();
+                uniqueCities.add(city);
             }
-        }).exceptionally(e -> {
-            try {
-                bot.execute(MessageUtil.sendText(chatId, "Failed to fetch gym city information. Please try again later."));
-            } catch (TelegramApiException ex) {
-                LOGGER.error("Failed to send error message", ex);
-            }
-            return null;
-        });
+            InlineKeyboardMarkup cityKeyboard = KeyboardUtil.createCityKeyboard(new ArrayList<>(uniqueCities));
+            bot.execute(MessageUtil.sendMenu(chatId, "Select a city:", cityKeyboard));
+        } catch (TelegramApiException e) {
+            LOGGER.error("Failed to send gym infos", e);
+        }
     }
 
     @Override
     public void execute(Long chatId, String[] args, ApinaBot bot) {
-        LOGGER.debug("Received args: {}", (Object) args);
+        LOGGER.debug("Executing city command. Received args: {}", (Object) args);
         String cities = String.join(" ", args);
-        LOGGER.debug("Received cities: {}", cities);
         CompletableFuture.supplyAsync(() -> apinaApiService.getGymsByCity(cities)).thenAccept(result -> {
             if (!result.isSuccess()) {
                 LOGGER.error("Failed to fetch gyms for the selected city. {}", result.getError().getMessage());

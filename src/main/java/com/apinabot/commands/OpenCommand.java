@@ -31,6 +31,7 @@ public class OpenCommand implements Command {
     }
     @Override
     public void execute(Long chatId, ApinaBot bot) {
+        LOGGER.debug("Executing open command");
         if (stateHandler == null) {
             stateHandler = bot.getStateHandler();
         } else {
@@ -38,36 +39,21 @@ public class OpenCommand implements Command {
             stateHandler.clearState(chatId, "open");
         }
         // Fetch all gyms and send the companies to the user and add them to the state handler
-        CompletableFuture.supplyAsync(apinaApiService::getAllGyms).thenAccept(result -> {
-            if (!result.isSuccess()) {
-                LOGGER.error("Failed to fetch gyms. {}", result.getError().getMessage());
-                return;
-            }
-            try {
-                List<GymInfo> gyms = result.getData();
-                gyms.removeIf(ApinaUtil::isCurrentlyClosed);
-                List<String> companyNames = gyms.stream().map(gym -> gym.getCompany().getName()).distinct().toList();
-                stateHandler.addSelections(chatId, companyNames, "open");
-                InlineKeyboardMarkup gymKeyboard = KeyboardUtil.createCompanySelectionKeyboard(companyNames, "open");
-                bot.execute(MessageUtil.sendMenu(chatId, "Select a company to see currently open gyms:", gymKeyboard));
-            } catch (TelegramApiException e) {
-                LOGGER.error("Failed to open menu for currently open gyms", e);
-            }
-        }).exceptionally(e -> {
-            try {
-                bot.execute(MessageUtil.sendText(chatId, "Failed to fetch open gym information. Please try again later."));
-            } catch (TelegramApiException ex) {
-                LOGGER.error("Failed to send error message", ex);
-            }
-            return null;
-        });
-
+        try {
+            List<GymInfo> gyms = stateHandler.getAllGyms();
+            gyms.removeIf(ApinaUtil::isCurrentlyClosed);
+            List<String> companyNames = gyms.stream().map(gym -> gym.getCompany().getName()).distinct().toList();
+            stateHandler.addSelections(chatId, companyNames, "open");
+            InlineKeyboardMarkup gymKeyboard = KeyboardUtil.createCompanySelectionKeyboard(companyNames, "open");
+            bot.execute(MessageUtil.sendMenu(chatId, "Select a company to see currently open gyms:", gymKeyboard));
+        } catch (TelegramApiException e) {
+            LOGGER.error("Failed to open menu for currently open gyms", e);
+        }
     }
     @Override
     public void execute(Long chatId, String[] args, ApinaBot bot) {
-        LOGGER.debug("Received args: {}", (Object) args);
+        LOGGER.debug("Executing open command. Received args: {}", (Object) args);
         String company = String.join(" ", args);
-        LOGGER.debug("Received company: {}", company);
         CompletableFuture.supplyAsync(() -> apinaApiService.getGymsByCompany(company)).thenAccept(result -> {
             try {
                 if (!result.isSuccess()) {
